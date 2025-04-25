@@ -79,6 +79,11 @@ int main()
     unsigned int *maskingData = loadSeedMasking("M1.txt", seed, n_pixels);
     int tamArrMascara= n_pixels*3;   //tamano total de la mascara
 
+    //result = verficarOperacionXor(pixelData, pixelMascara, maskingData, arrXOR, tamArrMascara, seed );
+    //result = verficarOperacionDesplazamiento(pixelData, pixelMascara, maskingData, tamArrMascara, seed, 2,true );
+    //cout<< result<<endl;
+
+
     //enmascaramiento
     for (int i = 0; i < tamArrMascara; i+=3) {                    //S(k)=I_D(k+s) + M(k)
         cout << "Pixel " << i / 3 << ": ("
@@ -89,8 +94,7 @@ int main()
 
     cout <<"*************************"<<endl;
 
-    //result = autoOperacionXor(pixelData, pixelMascara, maskingData, arrXOR, tamArrMascara, seed );
-    //cout<< result<<endl;
+
 
     bool exportI = exportImage(pixelData, width, height, archivoSalida); //NO es   lugar
 

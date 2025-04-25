@@ -12,4 +12,9 @@ unsigned char rotarIzquierda(unsigned char byte, int count);
 bool compararDato(int dato, int datoB);
 bool verficarOperacionXor(unsigned char arrImagen,unsigned chararrMascara,unsigned int arrTxt,unsigned chararrXor, int tamMascara, int semilla );
 void xorOperacion(unsigned char* pixelData, unsigned char arrMascara,unsigned intArrTxt, unsigned char* otherData, int totalBytes,int tamMascara,int semilla);//Operacion Xor
+bool verificarOperacionRotacion(unsigned char *arrImagen, unsigned char *arrMascara, unsigned int *arrTxt, int tamMascara, int semilla, int numeroRot, bool izquierda);
+void rotacionOperacion(unsigned char *pixelData, unsigned char *arrMascara, unsigned int *ArrTxt, int totalBytes, int tamMascara, int semilla, int numeroRot, bool izquierda);
+bool verficarOperacionDesplazamiento(unsigned char *arrImagen,unsigned char *arrMascara,unsigned int *arrTxt, int tamMascara, int semilla, int numeroDesp ,bool izquierda );
+void despOperacion(unsigned char *pixelData,unsigned char *arrMascara,unsigned int *ArrTxt, int totalBytes,int tamMascara, int semilla, int numeroDesp ,bool izquierda );
+
 #endif // FUNCIONES_H

@@ -14,7 +14,7 @@ bool compararDato(int dato, int datoB){
         return ban;
     }
 }
-bool verficarOperacionXor(unsigned char arrImagen,unsigned chararrMascara,unsigned int arrTxt,unsigned chararrXor, int tamMascara, int semilla ){
+bool verficarOperacionXor(unsigned char *arrImagen,unsigned char *arrMascara,unsigned int *arrTxt,unsigned char *arrXor, int tamMascara, int semilla ){
     bool ban = true;
     for(int i = 0; i<tamMascara; i++){
         unsigned char data = arrImagen[semilla + i] ^ arrXor[semilla +i];
@@ -27,7 +27,7 @@ bool verficarOperacionXor(unsigned char arrImagen,unsigned chararrMascara,unsign
     return ban;
 }
 // Operacion Xor
-void xorOperacion(unsigned char* pixelData, unsigned char arrMascara,unsigned intArrTxt,unsigned char* otherData, int totalBytes,int tamMascara,int semilla) {
+void xorOperacion(unsigned char* pixelData, unsigned char *arrMascara,unsigned int *ArrTxt,unsigned char* otherData, int totalBytes,int tamMascara,int semilla) {
     bool res = verficarOperacionXor(pixelData,arrMascara,ArrTxt,otherData, tamMascara, semilla);
     if(res){
         for (int i = 0; i < totalBytes; ++i) {
@@ -35,6 +35,43 @@ void xorOperacion(unsigned char* pixelData, unsigned char arrMascara,unsigned in
         }
     }
 }
+
+//Rotacion
+
+bool verificarOperacionRotacion(unsigned char *arrImagen, unsigned char *arrMascara, unsigned int *arrTxt, int tamMascara, int semilla, int numeroRot, bool izquierda) {
+    bool ban = true;
+
+    for(int i = 0; i < tamMascara; i++) {
+        // Aplicar rotación circular
+        unsigned char data = (izquierda)
+                                 ? (arrImagen[semilla + i] << numeroRot) | (arrImagen[semilla + i] >> (8 - numeroRot))
+                                 : (arrImagen[semilla + i] >> numeroRot) | (arrImagen[semilla + i] << (8 - numeroRot));
+
+        // Realizar la operación de enmascaramiento
+        int temporal = static_cast<int>(data) + static_cast<int>(arrMascara[i]);
+
+        // Comparar con los valores esperados
+        if (!compararDato(temporal, arrTxt[i])) {
+            return false; // Salimos en la primera falla
+        }
+    }
+
+    return true;
+}
+
+
+void rotacionOperacion(unsigned char *pixelData, unsigned char *arrMascara, unsigned int *ArrTxt, int totalBytes, int tamMascara, int semilla, int numeroRot, bool izquierda) {
+    bool res = verificarOperacionRotacion(pixelData, arrMascara, ArrTxt, tamMascara, semilla, numeroRot, izquierda);
+
+    if (res) {
+        for (int i = 0; i < totalBytes; ++i) {
+            pixelData[i] = (izquierda)
+            ? (pixelData[i] << numeroRot) | (pixelData[i] >> (8 - numeroRot))
+            : (pixelData[i] >> numeroRot) | (pixelData[i] << (8 - numeroRot));
+        }
+    }
+}
+
 
 unsigned char rotarDerecha(unsigned char byte, int count) {
     count %= 8;
@@ -57,6 +94,30 @@ void rotarCanales(unsigned char* pixelData, int totalBytes, int rotateAmount, bo
     }
 }
 
+
+//Desplazamiento
+
+bool verficarOperacionDesplazamiento(unsigned char *arrImagen,unsigned char *arrMascara,unsigned int *arrTxt, int tamMascara, int semilla, int numeroDesp ,bool izquierda ){
+    bool ban = true;
+    for(int i = 0; i<tamMascara; i++){
+        unsigned char data = (izquierda) ? arrImagen[semilla + i]<<numeroDesp:arrImagen[semilla + i]>>numeroDesp;
+        int temporal = static_cast<int>(data)+ static_cast<int>(arrMascara[i]);
+        if(compararDato(temporal,(arrTxt[i]))== false) { //Cambiar porque en el desplazamiento se pierden datos
+            ban = false;
+            return ban;
+        }
+    }
+    return ban;
+}
+
+void despOperacion(unsigned char *pixelData,unsigned char *arrMascara,unsigned int *ArrTxt, int totalBytes,int tamMascara, int semilla, int numeroDesp ,bool izquierda ) {
+    bool res = verficarOperacionDesplazamiento(pixelData,arrMascara,ArrTxt, tamMascara, semilla, numeroDesp,izquierda);
+    if(res){
+        for (int i = 0; i < totalBytes; ++i) {
+            pixelData[i] = (izquierda) ? pixelData[i] << numeroDesp:pixelData[i] >> numeroDesp;
+        }
+    }
+}
 
 /*
 void unionOperacion(){

@@ -10,4 +10,6 @@ void rotarCanales(unsigned char* pixelData, int totalBytes, int rotateAmount, bo
 unsigned char rotarDerecha(unsigned char byte, int count);
 unsigned char rotarIzquierda(unsigned char byte, int count);
 bool compararDato(int dato, int datoB);
+bool verficarOperacionXor(unsigned char arrImagen,unsigned chararrMascara,unsigned int arrTxt,unsigned chararrXor, int tamMascara, int semilla );
+void xorOperacion(unsigned char* pixelData, unsigned char arrMascara,unsigned intArrTxt, unsigned char* otherData, int totalBytes,int tamMascara,int semilla);//Operacion Xor
 #endif // FUNCIONES_H

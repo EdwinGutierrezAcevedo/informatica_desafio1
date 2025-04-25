@@ -5,10 +5,9 @@ unsigned char* loadPixels(QString input, int &width, int &height);
 bool exportImage(unsigned char* pixelData, int width,int height, QString archivoSalida);
 unsigned int* loadSeedMasking(const char* nombreArchivo, int &seed, int &n_pixels);
 
-void xorOperacion(unsigned char* pixelData, unsigned char *arrMascara,unsigned int *ArrTxt, unsigned char* otherData, int totalBytes,int tamMascara,int semilla);//Operacion Xor
+
 void rotarCanales(unsigned char* pixelData, int totalBytes, int rotateAmount, bool toLeft);// Operaacion Rotacion
 unsigned char rotarDerecha(unsigned char byte, int count);
 unsigned char rotarIzquierda(unsigned char byte, int count);
 bool compararDato(int dato, int datoB);
-bool autoOperacionXor(unsigned char *arrImagen,unsigned char *arrMascara,unsigned int *arrTxt,unsigned char *arrXor, int tamMascara, int semilla );
 #endif // FUNCIONES_H

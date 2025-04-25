@@ -14,37 +14,12 @@ bool compararDato(int dato, int datoB){
         return ban;
     }
 }
-bool autoOperacionXor(unsigned char *arrImagen,unsigned char *arrMascara,unsigned int *arrTxt,unsigned char *arrXor, int tamMascara, int semilla ){
-    bool ban = true;
-    for(int i = 0; i<tamMascara; i++){
-        unsigned char data = arrImagen[semilla + i] ^ arrXor[semilla +i];
-        int temporal = static_cast<int>(data)+ static_cast<int>(arrMascara[i]);
-        if(compararDato(temporal,(arrTxt[i]))== false) {
-            ban = false;
-            return ban;
-        }
-    }
-    return ban;
-}
-// Operacion Xor
-void xorOperacion(unsigned char* pixelData, unsigned char *arrMascara,unsigned int *ArrTxt,unsigned char* otherData, int totalBytes,int tamMascara,int semilla) {
-    bool res = autoOperacionXor(pixelData,arrMascara,ArrTxt,otherData, tamMascara, semilla);
-    if(res){
-        for (int i = 0; i < totalBytes; ++i) {
-            pixelData[i] = pixelData[i] ^ otherData[i];
-        }
-    }
-}
 
-
-
-//Rotacion
 unsigned char rotarDerecha(unsigned char byte, int count) {
     count %= 8;
     return (byte >> count) | (byte << (8 - count));
 }
 
-//Rotacion
 unsigned char rotarIzquierda(unsigned char byte, int count) {
     // Aseguramos que 'count' esté entre 0 y 7
     count %= 8;

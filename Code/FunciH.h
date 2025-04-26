@@ -10,11 +10,11 @@ void rotarCanales(unsigned char* pixelData, int totalBytes, int rotateAmount, bo
 unsigned char rotarDerecha(unsigned char byte, int count);
 unsigned char rotarIzquierda(unsigned char byte, int count);
 bool compararDato(int dato, int datoB);
-bool verficarOperacionXor(unsigned char arrImagen,unsigned chararrMascara,unsigned int arrTxt,unsigned chararrXor, int tamMascara, int semilla );
-bool xorOperacion(unsigned char* pixelData, unsigned char arrMascara,unsigned intArrTxt, unsigned char* otherData, int totalBytes,int tamMascara,int semilla);//Operacion Xor
-bool verificarOperacionRotacion(unsigned char arrImagen, unsigned chararrMascara, unsigned int arrTxt, int tamMascara, int semilla, int numeroRot, bool izquierda);
-bool rotacionOperacion(unsigned charpixelData, unsigned char arrMascara, unsigned intArrTxt, int totalBytes, int tamMascara, int semilla, int numeroRot, bool izquierda);
-bool verficarOperacionDesplazamiento(unsigned char arrImagen,unsigned chararrMascara,unsigned int arrTxt, int tamMascara, int semilla, int numeroDesp ,bool izquierda );
-bool despOperacion(unsigned charpixelData,unsigned char arrMascara,unsigned intArrTxt, int totalBytes,int tamMascara, int semilla, int numeroDesp ,bool izquierda );
-void unionOperacion(unsigned char pixelData, unsigned chararrMascara, unsigned int ArrTxt, unsigned chararrXor, int totalBytes, int tamMascara, int semilla);
+bool verficarOperacionXor(unsigned char* arrImagen,unsigned char* arrMascara,unsigned int* arrTxt,unsigned char* arrXor, int tamMascara, int semilla );
+bool xorOperacion(unsigned char* pixelData, unsigned char* arrMascara,unsigned int* ArrTxt, unsigned char* otherData, int totalBytes,int tamMascara,int semilla);//Operacion Xor
+bool verificarOperacionRotacion(unsigned char* arrImagen, unsigned char* arrMascara, unsigned int* arrTxt, int tamMascara, int semilla, int numeroRot, bool izquierda);
+bool rotacionOperacion(unsigned char* pixelData, unsigned char* arrMascara, unsigned int* ArrTxt, int totalBytes, int tamMascara, int semilla, int numeroRot, bool izquierda);
+bool verficarOperacionDesplazamiento(unsigned char* arrImagen,unsigned char* arrMascara,unsigned int* arrTxt, int tamMascara, int semilla, int numeroDesp ,bool izquierda );
+bool despOperacion(unsigned char* pixelData,unsigned char* arrMascara,unsigned int* ArrTxt, int totalBytes,int tamMascara, int semilla, int numeroDesp ,bool izquierda );
+void unionOperacion(unsigned char* pixelData, unsigned char* arrMascara, unsigned int* ArrTxt, unsigned char* arrXor, int totalBytes, int tamMascara, int semilla);
 #endif // FUNCIONES_H

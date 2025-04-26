@@ -33,6 +33,8 @@
 
 #include <fstream>
 #include <iostream>
+#include <sstream>
+#include <string>
 #include <QCoreApplication>
 #include <QImage>
 #include "FunciH.h"
@@ -76,8 +78,8 @@ int main()
     int n_pixels = 0;
 
     // Carga los datos de enmascaramiento desde un archivo .txt (semilla + valores RGB)
-    unsigned int *maskingData = loadSeedMasking("M1.txt", seed, n_pixels);
-    int tamArrMascara= n_pixels*3;   //tamano total de la mascara
+    //unsigned int *maskingData = loadSeedMasking("M1.txt", seed, n_pixels);
+    //int tamArrMascara= n_pixels*3;   //tamano total de la mascara
     //result = verficarOperacionXor(pixelData, pixelMascara, maskingData, arrXOR, tamArrMascara, seed );
     //result = verficarOperacionDesplazamiento(pixelData, pixelMascara, maskingData, tamArrMascara, seed, 2,true );
     //cout<< result<<endl;
@@ -94,25 +96,22 @@ int main()
     cout <<"*************************"<<endl;
     */
 
+    int numArchivos;
 
-     //NO es   lugar
-    unionOperacion(pixelData,pixelMascara,maskingData,arrXOR,tamArrOriginal,tamArrMascara,seed);
-    bool exportI = exportImage(pixelData, width, height, archivoSalida);
-    //paso 2
-    unsigned int *maskingData2 = loadSeedMasking("M2.txt", seed, n_pixels);
-    unionOperacion(pixelData,pixelMascara,maskingData2,arrXOR,tamArrOriginal,tamArrMascara,seed);
-    exportI = exportImage(pixelData, width, height, archivoSalida);
-    unsigned int *maskingData3 = loadSeedMasking("M2.txt", seed, n_pixels);
-    unionOperacion(pixelData,pixelMascara,maskingData2,arrXOR,tamArrOriginal,tamArrMascara,seed);
+    cout << "Ingrese la cantidad de archivos a procesar: ";
+    cin >> numArchivos;
+    // Llamamos a la función que procesa los archivos.
+    procesarArchivos(numArchivos,pixelData,pixelMascara,arrXOR,tamArrOriginal);
     // Libera la memoria usada para los píxeles
     delete[] pixelData;
     pixelData = nullptr;
     // Libera la memoria usada para los datos de enmascaramiento
-    if (maskingData != nullptr){
+    /*if (maskingData != nullptr){
         delete[] maskingData;
         maskingData = nullptr;
     }
-
+    */
 
     return 0; // Fin del programa
 }
+

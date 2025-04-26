@@ -27,12 +27,19 @@ bool verficarOperacionXor(unsigned char *arrImagen,unsigned char *arrMascara,uns
     return ban;
 }
 // Operacion Xor
-void xorOperacion(unsigned char* pixelData, unsigned char *arrMascara,unsigned int *ArrTxt,unsigned char* otherData, int totalBytes,int tamMascara,int semilla) {
+bool xorOperacion(unsigned char* pixelData, unsigned char *arrMascara,unsigned int *ArrTxt,unsigned char* otherData, int totalBytes,int tamMascara,int semilla) {
+    bool cambio=true;
     bool res = verficarOperacionXor(pixelData,arrMascara,ArrTxt,otherData, tamMascara, semilla);
     if(res){
         for (int i = 0; i < totalBytes; ++i) {
             pixelData[i] = pixelData[i] ^ otherData[i];
         }
+        cout<<"La operacion bit a bit aplicada fue xor"<<endl;
+        return cambio;
+    }
+    else{
+        cambio=false;
+        return cambio;
     }
 }
 
@@ -60,15 +67,22 @@ bool verificarOperacionRotacion(unsigned char *arrImagen, unsigned char *arrMasc
 }
 
 
-void rotacionOperacion(unsigned char *pixelData, unsigned char *arrMascara, unsigned int *ArrTxt, int totalBytes, int tamMascara, int semilla, int numeroRot, bool izquierda) {
+bool rotacionOperacion(unsigned char *pixelData, unsigned char *arrMascara, unsigned int *ArrTxt, int totalBytes, int tamMascara, int semilla, int numeroRot, bool izquierda) {
+    bool cambio=true;
     bool res = verificarOperacionRotacion(pixelData, arrMascara, ArrTxt, tamMascara, semilla, numeroRot, izquierda);
-
+    string dir = (izquierda) ? "izquierda":"derecha";
     if (res) {
         for (int i = 0; i < totalBytes; ++i) {
             pixelData[i] = (izquierda)
             ? (pixelData[i] << numeroRot) | (pixelData[i] >> (8 - numeroRot))
             : (pixelData[i] >> numeroRot) | (pixelData[i] << (8 - numeroRot));
         }
+        cout<<"La operacion bit a bit aplicada fue una rotacion de "<< numeroRot << " bits a la"<< dir <<endl;
+        return cambio;
+    }
+    else{
+        cambio=false;
+        return cambio;
     }
 }
 
@@ -110,44 +124,26 @@ bool verficarOperacionDesplazamiento(unsigned char *arrImagen,unsigned char *arr
     return ban;
 }
 
-void despOperacion(unsigned char *pixelData,unsigned char *arrMascara,unsigned int *ArrTxt, int totalBytes,int tamMascara, int semilla, int numeroDesp ,bool izquierda ) {
+bool despOperacion(unsigned char *pixelData,unsigned char *arrMascara,unsigned int *ArrTxt, int totalBytes,int tamMascara, int semilla, int numeroDesp ,bool izquierda ) {
+    string dir = (izquierda) ? "izquierda":"derecha";
+    bool cambio = true;
     bool res = verficarOperacionDesplazamiento(pixelData,arrMascara,ArrTxt, tamMascara, semilla, numeroDesp,izquierda);
     if(res){
         for (int i = 0; i < totalBytes; ++i) {
             pixelData[i] = (izquierda) ? pixelData[i] << numeroDesp:pixelData[i] >> numeroDesp;
         }
+        cout<<"La operacion bit a bit aplicada fue un desplazamiento de "<< numeroDesp << " bits a la "<< dir <<endl;
+        return cambio;
+    }
+    else{
+        cambio=false;
+        return cambio;
     }
 }
 
-/*
-void unionOperacion(){
-    int opc;
 
-    cout<<"Ingrese cantidad de txt: ";
-    cin>>opc;
 
-    for(int j = 1 ; j<=opc ; i++){
-        for(int i= 1; i<=3; i++){
-            switch (i){
-            case 1: for(int k= 0; k<8; k++){//rotacion
-                }
-                //break;
-            case 2:for(int k= 0; k<8; k++){//desplazamiento
-                }
-                //break;
-            case 3:
-                for(int k= 0; k<8; k++){//xor
 
-                }
-                //break;
-
-            }
-        }
-
-    }
-
-}
-*/
 unsigned char* loadPixels(QString input, int &width, int &height){ //IMPORTANTE
     /*
  * @brief Carga una imagen BMP desde un archivo y extrae los datos de píxeles en formato RGB.
@@ -319,6 +315,48 @@ unsigned int* loadSeedMasking(const char* nombreArchivo, int &seed, int &n_pixel
     return RGB;
 }
 
+
+void unionOperacion(unsigned char *pixelData, unsigned char *arrMascara, unsigned int *ArrTxt, unsigned char *arrXor, int totalBytes, int tamMascara, int semilla) {
+    int opc=1;
+
+    //cout << "Ingrese cantidad de txt: ";
+    //cin >> opc;
+    bool cambio = false;
+    for (int j = 1; j <= opc; j++) {
+        for (int i = 1; i <= 3; i++) {
+            switch (i) {
+            case 1:
+                // Operación XOR
+                cambio = xorOperacion(pixelData, arrMascara, ArrTxt, arrXor, totalBytes, tamMascara, semilla);
+                break;
+            case 2:
+                for (int k = 1; k < 8; k++) { // Rotación
+                    bool izquierda = true;
+                    cambio = rotacionOperacion(pixelData, arrMascara, ArrTxt, totalBytes, tamMascara, semilla, k, izquierda);
+                    if (cambio) break;
+
+                    izquierda = !izquierda;
+                    cambio = rotacionOperacion(pixelData, arrMascara, ArrTxt, totalBytes, tamMascara, semilla, k, izquierda);
+                    if (cambio) break;
+                }
+                break; // Salida del case 2
+
+            case 3:
+                for (int k = 1; k < 8; k++) { // Desplazamiento
+                    bool izquierda = true;
+                    cambio = despOperacion(pixelData, arrMascara, ArrTxt, totalBytes, tamMascara, semilla, k, izquierda);
+                    if (cambio) break;
+
+                    izquierda = !izquierda;
+                    cambio = despOperacion(pixelData, arrMascara, ArrTxt, totalBytes, tamMascara, semilla, k, izquierda);
+                    if (cambio) break;
+                }
+                break; // Salida del case 3
+
+            }
+        }
+    }
+}
 
 
 

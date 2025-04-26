@@ -2,6 +2,8 @@
 #include <iostream>
 #include <QCoreApplication>
 #include <QImage>
+#include <sstream>
+#include <string>
 
 using namespace std;
 
@@ -316,44 +318,69 @@ unsigned int* loadSeedMasking(const char* nombreArchivo, int &seed, int &n_pixel
 }
 
 
+
 void unionOperacion(unsigned char *pixelData, unsigned char *arrMascara, unsigned int *ArrTxt, unsigned char *arrXor, int totalBytes, int tamMascara, int semilla) {
-    int opc=1;
-
-    //cout << "Ingrese cantidad de txt: ";
-    //cin >> opc;
-    bool cambio = false;
-    for (int j = 1; j <= opc; j++) {
-        for (int i = 1; i <= 3; i++) {
-            switch (i) {
-            case 1:
-                // Operación XOR
-                cambio = xorOperacion(pixelData, arrMascara, ArrTxt, arrXor, totalBytes, tamMascara, semilla);
-                break;
-            case 2:
-                for (int k = 1; k < 8; k++) { // Rotación
-                    bool izquierda = true;
-                    cambio = rotacionOperacion(pixelData, arrMascara, ArrTxt, totalBytes, tamMascara, semilla, k, izquierda);
-                    if (cambio) break;
-
-                    izquierda = !izquierda;
-                    cambio = rotacionOperacion(pixelData, arrMascara, ArrTxt, totalBytes, tamMascara, semilla, k, izquierda);
-                    if (cambio) break;
-                }
-                break; // Salida del case 2
-
-            case 3:
-                for (int k = 1; k < 8; k++) { // Desplazamiento
-                    bool izquierda = true;
-                    cambio = despOperacion(pixelData, arrMascara, ArrTxt, totalBytes, tamMascara, semilla, k, izquierda);
-                    if (cambio) break;
-
-                    izquierda = !izquierda;
-                    cambio = despOperacion(pixelData, arrMascara, ArrTxt, totalBytes, tamMascara, semilla, k, izquierda);
-                    if (cambio) break;
-                }
-                break; // Salida del case 3
-
+    for (int i = 1; i <= 3; i++) {
+        bool cambio = false;
+        switch (i) {
+        case 1:
+            // Operación XOR
+            cambio = xorOperacion(pixelData, arrMascara, ArrTxt, arrXor, totalBytes, tamMascara, semilla);
+            if(cambio)break;
+        case 2:
+            for (int k = 1; k < 8; k++) { // Rotación
+                bool izquierda = true;
+                cambio = rotacionOperacion(pixelData, arrMascara, ArrTxt, totalBytes, tamMascara, semilla, k, izquierda);
+                if (cambio) break;
+                izquierda = !izquierda;
+                cambio = rotacionOperacion(pixelData, arrMascara, ArrTxt, totalBytes, tamMascara, semilla, k, izquierda);
+                if (cambio) break;
             }
+            break; // Salida del case 2
+
+        case 3:
+            for (int k = 1; k < 8; k++) { // Desplazamiento
+                bool izquierda = true;
+                cambio = despOperacion(pixelData, arrMascara, ArrTxt, totalBytes, tamMascara, semilla, k, izquierda);
+                if (cambio) break;
+                izquierda = !izquierda;
+                cambio = despOperacion(pixelData, arrMascara, ArrTxt, totalBytes, tamMascara, semilla, k, izquierda);
+                if (cambio) break;
+            }
+            break; // Salida del case 3
         }
+        break;
     }
 }
+
+void procesarArchivos(int numArchivos,unsigned char *pixelData, unsigned char *arrMascara, unsigned char *arrXor, int totalBytes) {
+    for (int j = 1; j <= numArchivos; j++) {
+        // Construir el nombre del archivo: "M1.txt", "M2.txt", ..., "Mn.txt"
+        stringstream ss;
+        ss << "M" << j << ".txt";
+        string nombreArchivo = ss.str();
+
+        int seed = 0;
+        int n_pixels = 0;
+
+        // Llamar a la función de carga
+        unsigned int* maskingData = loadSeedMasking(nombreArchivo.c_str(), seed, n_pixels);
+
+        if (maskingData != nullptr) {
+            cout << "Archivo " << nombreArchivo << " procesado exitosamente." << endl;
+            // Aquí podrías agregar más procesamiento de datosRGB, si es necesario.
+            int tamMascara= n_pixels*3;
+            unionOperacion(pixelData,arrMascara,maskingData,arrXor,totalBytes,tamMascara,seed);
+
+
+
+            // Liberar la memoria reservada para los datos RGB.
+            delete[] maskingData;
+        } else {
+            cout << "Error al cargar el archivo: " << nombreArchivo << endl;
+        }
+
+        cout << "----------------------------------------" << endl;
+    }
+}
+

@@ -357,16 +357,3 @@ void unionOperacion(unsigned char *pixelData, unsigned char *arrMascara, unsigne
         }
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-

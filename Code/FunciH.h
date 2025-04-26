@@ -17,4 +17,8 @@ bool rotacionOperacion(unsigned char* pixelData, unsigned char* arrMascara, unsi
 bool verficarOperacionDesplazamiento(unsigned char* arrImagen,unsigned char* arrMascara,unsigned int* arrTxt, int tamMascara, int semilla, int numeroDesp ,bool izquierda );
 bool despOperacion(unsigned char* pixelData,unsigned char* arrMascara,unsigned int* ArrTxt, int totalBytes,int tamMascara, int semilla, int numeroDesp ,bool izquierda );
 void unionOperacion(unsigned char* pixelData, unsigned char* arrMascara, unsigned int* ArrTxt, unsigned char* arrXor, int totalBytes, int tamMascara, int semilla);
+void procesarArchivos(int numArchivos,unsigned char *pixelData, unsigned char *arrMascara, unsigned char *arrXor, int totalBytes);
 #endif // FUNCIONES_H
+
+
+

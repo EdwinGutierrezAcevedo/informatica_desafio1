@@ -1,40 +1,43 @@
 /*
- * Programa demostrativo de manipulaciónprocesamiento de imágenes BMP en C++ usando Qt.
+ * Programa para reconstruir imagenes BMP en C++ usando Qt.
  *
- * Descripción:
+ * Descripcion:
  * Este programa realiza las siguientes tareas:
- * 1. Carga una imagen BMP desde un archivo (formato RGB sin usar estructuras ni STL).
- * 2. Modifica los valores RGB de los píxeles asignando un degradado artificial basado en su posición.
- * 3. Exporta la imagen modificada a un nuevo archivo BMP.
- * 4. Carga un archivo de texto que contiene una semilla (offset) y los resultados del enmascaramiento
- *    aplicados a una versión transformada de la imagen, en forma de tripletas RGB.
- * 5. Muestra en consola los valores cargados desde el archivo de enmascaramiento.
- * 6. Gestiona la memoria dinámicamente, liberando los recursos utilizados.
+ * 1. Carga la imagen modificada, del XOR y de la mascara; los archivos de enmascaramiento
+ *    que contienen la semilla y los resultados del aplicados a una versión transformada
+ *    de la imagen, en forma de tripletas RGB. Cada uno se guarda en un arreglo dinamico lineal.
+ *
+ * 2. Verifica con cada mascara y modifica los valores RGB para revertir el proceso que se le aplico.
+ *
+ * 3. Exporta la imagen reconstruida a un nuevo archivo BMP.
+ *
+ * 4. Muestra en consola los tipos de operaciones a nivel de bits que se le aplicaron a la imagen original y en que orden.
+ *
+ * 5. Gestiona la memoria dinámicamente, liberando los recursos utilizados.
  *
  * Entradas:
- * - Archivo de imagen BMP de entrada ("I_O.bmp").
+ * - Cantidad n de mascaras utilizadas o numero de archivos txt.
+ * - Archivo de imagen BMP de entrada ("Pn.bmp").
  * - Archivo de salida para guardar la imagen modificada ("I_D.bmp").
- * - Archivo de texto ("M1.txt") que contiene:
+ * - Archivos de texto ("Mn.txt") que contienen:
  *     • Una línea con la semilla inicial (offset).
  *     • Varias líneas con tripletas RGB resultantes del enmascaramiento.
  *
  * Salidas:
  * - Imagen BMP modificada ("I_D.bmp").
- * - Datos RGB leídos desde el archivo de enmascaramiento impresos por consola.
+ * - Operaciones a nivel de bits aplicadas a nivel de bit en el orden que se aplicaron.
  *
  * Requiere:
  * - Librerías Qt para manejo de imágenes (QImage, QString).
  * - No utiliza estructuras ni STL. Solo arreglos dinámicos y memoria básica de C++.
  *
- * Autores: Augusto Salazar Y Aníbal Guerra
- * Fecha: 06/04/2025
- * Asistencia de ChatGPT para mejorar la forma y presentación del código fuente
+ * Autores: Edwin Gutierrez y Angel Ramirez
+ * Fecha: 27/04/2025
  */
 
 #include <fstream>
 #include <iostream>
-#include <sstream>
-#include <string>
+#include <QString>
 #include <QCoreApplication>
 #include <QImage>
 #include "FunciH.h"
@@ -43,9 +46,11 @@ using namespace std;
 
 int main()
 {
-    //Def
-    // Definición de rutas de archivo de entrada (imagen original) y salida (imagen modificada)
-    QString archivoEntrada = "P6.bmp";
+    // Definición de rutas de archivos de entrada (imagen modificada, XOR y mascara) y salida (imagen original)
+    int n;
+    cout << "Ingrese el numero de enmascaramientos hechos: ";
+    cin >> n;
+    QString archivoEntrada = "P" + QString::number(n) + ".bmp";
     QString archivoSalida = "I_D.bmp";
     QString archivoXOR = "I_M.bmp";
     QString archivoMascara = "M.bmp";
@@ -54,64 +59,26 @@ int main()
     int height = 0;
     int width = 0;
 
-    // Carga la imagen BMP en memoria dinámica y obtiene ancho y alto
+    // Carga la imagen BMP en memoria dinamica y obtiene ancho y alto
     unsigned char *pixelData = loadPixels(archivoEntrada, width, height);
     unsigned char *pixelMascara = loadPixels(archivoMascara, width, height);
     unsigned char *arrXOR = loadPixels(archivoXOR, width, height);
     int tamArrOriginal=height*width*3;
-    bool result;
+    bool exportI;
 
 
-
-    // xorOperacion(pixelData,arrXOR,tamArrOriginal);
-
-    // Exporta la imagen modificada a un nuevo archivo BMP
-    //bool exportI = exportImage(pixelData, width, height, archivoSalida);
-
-    // Muestra si la exportación fue exitosa (true o false)
-    //cout << exportI << endl;
-    //a
-
-
-    // Variables para almacenar la semilla y el número de píxeles leídos del archivo de enmascaramiento
-    int seed = 0;
-    int n_pixels = 0;
-
-    // Carga los datos de enmascaramiento desde un archivo .txt (semilla + valores RGB)
-    //unsigned int *maskingData = loadSeedMasking("M1.txt", seed, n_pixels);
-    //int tamArrMascara= n_pixels*3;   //tamano total de la mascara
-    //result = verficarOperacionXor(pixelData, pixelMascara, maskingData, arrXOR, tamArrMascara, seed );
-    //result = verficarOperacionDesplazamiento(pixelData, pixelMascara, maskingData, tamArrMascara, seed, 2,true );
-    //cout<< result<<endl;
-
-    /*
-    //enmascaramiento
-    for (int i = 0; i < tamArrMascara; i+=3) {                    //S(k)=I_D(k+s) + M(k)
-        cout << "Pixel " << i / 3 << ": ("
-             <<   static_cast<int>(pixelData[seed + (i)]) + static_cast<int>(pixelMascara[i]) << ", "
-             <<  static_cast<int>(pixelData[seed + (i+1)])+ static_cast<int>(pixelMascara[i+1]) << ", "
-             <<   static_cast<int>(pixelData[seed + (i+2)]) + static_cast<int>(pixelMascara[i+2]) << ")" << endl;
-    }
-
-    cout <<"*************************"<<endl;
-    */
-
-    int numArchivos;
-
-    cout << "Ingrese la cantidad de archivos a procesar: ";
-    cin >> numArchivos;
-    // Llamamos a la función que procesa los archivos.
-    procesarArchivos(numArchivos,pixelData,pixelMascara,arrXOR,tamArrOriginal);
-    bool exportI = exportImage(pixelData, width, height, archivoSalida);
-    // Libera la memoria usada para los píxeles
+    // Llamamos a la funcion que procesa los archivos.
+    procesarArchivos(n,pixelData,pixelMascara,arrXOR,tamArrOriginal);
+    exportI = exportImage(pixelData, width, height, archivoSalida);
+    // Libera la memoria usada para los pixeles
     delete[] pixelData;
     pixelData = nullptr;
-    // Libera la memoria usada para los datos de enmascaramiento
-    /*if (maskingData != nullptr){
-        delete[] maskingData;
-        maskingData = nullptr;
-    }
-    */
+    delete[] pixelMascara;
+    pixelMascara = nullptr;
+    delete[] arrXOR;
+    arrXOR = nullptr;
 
     return 0; // Fin del programa
 }
+
+

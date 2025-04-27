@@ -2,8 +2,6 @@
 #include <iostream>
 #include <QCoreApplication>
 #include <QImage>
-#include <sstream>
-#include <string>
 
 using namespace std;
 
@@ -19,11 +17,7 @@ bool compararDato(int dato, int datoB){
 bool verficarOperacionXor(unsigned char *arrImagen,unsigned char *arrMascara,unsigned int *arrTxt,unsigned char *arrXor, int tamMascara, int semilla ){
     bool ban = true;
     for(int i = 0; i<tamMascara; i++){
-        int iM_antes=static_cast<int>(arrImagen[semilla + i]);
         unsigned char data = arrImagen[semilla + i] ^ arrXor[semilla +i];
-        int iM_despues=static_cast<int>(data);
-        int mas=arrMascara[i];
-        unsigned int iTxt=arrTxt[i];
         int temporal = static_cast<int>(data)+ static_cast<int>(arrMascara[i]);
         if(compararDato(temporal,(arrTxt[i]))== false) {
             ban = false;
@@ -33,14 +27,14 @@ bool verficarOperacionXor(unsigned char *arrImagen,unsigned char *arrMascara,uns
     return ban;
 }
 // Operacion Xor
-bool xorOperacion(unsigned char* pixelData, unsigned char *arrMascara,unsigned int *ArrTxt,unsigned char* otherData, int totalBytes,int tamMascara,int semilla) {
+bool xorOperacion(unsigned char* pixelData, unsigned char *arrMascara, unsigned int *ArrTxt, unsigned char* otherData, int totalBytes, int tamMascara, int semilla, int numOrden) {
     bool cambio=true;
     bool res = verficarOperacionXor(pixelData,arrMascara,ArrTxt,otherData, tamMascara, semilla);
     if(res){
         for (int i = 0; i < totalBytes; ++i) {
             pixelData[i] = pixelData[i] ^ otherData[i];
         }
-        cout<<"La operacion bit a bit aplicada fue xor"<<endl;
+        cout<<numOrden<<")"<<" La operacion bit a bit aplicada fue xor"<<endl;
         return cambio;
     }
     else{
@@ -72,44 +66,22 @@ bool verificarOperacionRotacion(unsigned char *arrImagen, unsigned char *arrMasc
 }
 
 
-bool rotacionOperacion(unsigned char *pixelData, unsigned char *arrMascara, unsigned int *ArrTxt, int totalBytes, int tamMascara, int semilla, int numeroRot, bool izquierda) {
+bool rotacionOperacion(unsigned char *pixelData, unsigned char *arrMascara, unsigned int *ArrTxt, int totalBytes, int tamMascara, int semilla, int numeroRot, bool izquierda, int numOrden) {
     bool cambio=true;
     bool res = verificarOperacionRotacion(pixelData, arrMascara, ArrTxt, tamMascara, semilla, numeroRot, izquierda);
-    string dir = (izquierda) ? "izquierda":"derecha";
+    string dir = (izquierda) ? "derecha":"izquierda";
     if (res) {
         for (int i = 0; i < totalBytes; ++i) {
             pixelData[i] = (izquierda)
             ? (pixelData[i] << numeroRot) | (pixelData[i] >> (8 - numeroRot))
             : (pixelData[i] >> numeroRot) | (pixelData[i] << (8 - numeroRot));
         }
-        cout<<"La operacion bit a bit aplicada fue una rotacion de "<< numeroRot << " bits a la"<< dir <<endl;
+        cout<<numOrden<<")"<<" La operacion bit a bit aplicada fue una rotacion de "<< numeroRot << " bits a la "<< dir <<endl;
         return cambio;
     }
     else{
         cambio=false;
         return cambio;
-    }
-}
-
-
-unsigned char rotarDerecha(unsigned char byte, int count) {
-    count %= 8;
-    return (byte >> count) | (byte << (8 - count));
-}
-
-unsigned char rotarIzquierda(unsigned char byte, int count) {
-    // Aseguramos que 'count' esté entre 0 y 7
-    count %= 8;
-    return (byte << count) | (byte >> (8 - count));
-}
-//RotaciónImagen
-void rotarCanales(unsigned char* pixelData, int totalBytes, int rotateAmount, bool toLeft) {
-    for (int i = 0; i < totalBytes; ++i) {
-        if (toLeft) {
-            pixelData[i] = rotarIzquierda(pixelData[i], rotateAmount);
-        } else {
-            pixelData[i] = rotarDerecha(pixelData[i], rotateAmount);
-        }
     }
 }
 
@@ -129,15 +101,15 @@ bool verficarOperacionDesplazamiento(unsigned char *arrImagen,unsigned char *arr
     return ban;
 }
 
-bool despOperacion(unsigned char *pixelData,unsigned char *arrMascara,unsigned int *ArrTxt, int totalBytes,int tamMascara, int semilla, int numeroDesp ,bool izquierda ) {
-    string dir = (izquierda) ? "izquierda":"derecha";
+bool despOperacion(unsigned char *pixelData, unsigned char *arrMascara, unsigned int *ArrTxt, int totalBytes, int tamMascara, int semilla, int numeroDesp , bool izquierda , int numOrden) {
+    string dir = (izquierda) ? "derecha":"izquierda";
     bool cambio = true;
     bool res = verficarOperacionDesplazamiento(pixelData,arrMascara,ArrTxt, tamMascara, semilla, numeroDesp,izquierda);
     if(res){
         for (int i = 0; i < totalBytes; ++i) {
             pixelData[i] = (izquierda) ? pixelData[i] << numeroDesp:pixelData[i] >> numeroDesp;
         }
-        cout<<"La operacion bit a bit aplicada fue un desplazamiento de "<< numeroDesp << " bits a la "<< dir <<endl;
+        cout<<numOrden<<")"<<" La operacion bit a bit aplicada fue un desplazamiento de "<< numeroDesp << " bits a la "<< dir <<endl;
         return cambio;
     }
     else{
@@ -149,8 +121,8 @@ bool despOperacion(unsigned char *pixelData,unsigned char *arrMascara,unsigned i
 
 
 
-unsigned char* loadPixels(QString input, int &width, int &height){ //IMPORTANTE
-    /*
+unsigned char* loadPixels(QString input, int &width, int &height){
+/*
  * @brief Carga una imagen BMP desde un archivo y extrae los datos de píxeles en formato RGB.
  *
  * Esta función utiliza la clase QImage de Qt para abrir una imagen en formato BMP, convertirla al
@@ -220,6 +192,10 @@ bool exportImage(unsigned char* pixelData, int width,int height, QString archivo
  * @note La función no libera la memoria del arreglo pixelData; esta responsabilidad recae en el usuario.
  */
 
+    // Verificar que pixelData no sea nulo
+    if (pixelData == nullptr) {
+        return false;
+    }
     // Crear una nueva imagen de salida con el mismo tamaño que la original
     // usando el formato RGB888 (3 bytes por píxel, sin canal alfa)
     QImage outputImage(width, height, QImage::Format_RGB888);
@@ -239,10 +215,9 @@ bool exportImage(unsigned char* pixelData, int width,int height, QString archivo
         return false; // Indica que la operación falló
     } else {
         // Si la imagen fue guardada correctamente, mostrar mensaje de éxito
-        cout << "Imagen BMP modificada guardada como " << archivoSalida.toStdString() << endl;
+        cout << "Imagen BMP reconstruida fue guardada como " << archivoSalida.toStdString() << endl;
         return true; // Indica éxito
     }
-
 }
 
 unsigned int* loadSeedMasking(const char* nombreArchivo, int &seed, int &n_pixels){
@@ -273,13 +248,13 @@ unsigned int* loadSeedMasking(const char* nombreArchivo, int &seed, int &n_pixel
         return nullptr;
     }
 
-    // Leer la semilla desde la primera línea del archivo
+    // Leer la semilla desde la primera linea del archivo
     archivo >> seed;
 
     int r, g, b;
 
-    // Contar cuántos grupos de valores RGB hay en el archivo
-    // Se asume que cada línea después de la semilla tiene tres valores (r, g, b)
+    // Contar cuantos grupos de valores RGB hay en el archivo
+    // Se asume que cada linea después de la semilla tiene tres valores (r, g, b)
     while (archivo >> r >> g >> b) {
         n_pixels++;  // Contamos la cantidad de píxeles
     }
@@ -294,7 +269,7 @@ unsigned int* loadSeedMasking(const char* nombreArchivo, int &seed, int &n_pixel
         return nullptr;
     }
 
-    // Reservar memoria dinámica para guardar todos los valores RGB
+    // Reservar memoria dinamica para guardar todos los valores RGB
     // Cada píxel tiene 3 componentes: R, G y B
     unsigned int* RGB = new unsigned int[n_pixels * 3];
 
@@ -312,31 +287,27 @@ unsigned int* loadSeedMasking(const char* nombreArchivo, int &seed, int &n_pixel
     // Cerrar el archivo después de terminar la lectura
     archivo.close();
 
-    // Mostrar información de control en consola
-    cout << "Semilla: " << seed << endl;
-    cout << "Cantidad de píxeles leídos: " << n_pixels << endl;
-
     // Retornar el puntero al arreglo con los datos RGB
     return RGB;
 }
 
 
 
-void unionOperacion(unsigned char *pixelData, unsigned char *arrMascara, unsigned int *ArrTxt, unsigned char *arrXor, int totalBytes, int tamMascara, int semilla) {
+void unionOperacion(unsigned char *pixelData, unsigned char *arrMascara, unsigned int *ArrTxt, unsigned char *arrXor, int totalBytes, int tamMascara, int semilla, int numOrden) {
     for (int i = 1; i <= 3; i++) {
         bool cambio = false;
         switch (i) {
         case 1:
-            // Operación XOR
-            cambio = xorOperacion(pixelData, arrMascara, ArrTxt, arrXor, totalBytes, tamMascara, semilla);
+            // Operacion XOR
+            cambio = xorOperacion(pixelData, arrMascara, ArrTxt, arrXor, totalBytes, tamMascara, semilla, numOrden);
             if(cambio)break;
         case 2:
-            for (int k = 1; k < 8; k++) { // Rotación
+            for (int k = 1; k < 8; k++) { // Rotacion
                 bool izquierda = true;
-                cambio = rotacionOperacion(pixelData, arrMascara, ArrTxt, totalBytes, tamMascara, semilla, k, izquierda);
+                cambio = rotacionOperacion(pixelData, arrMascara, ArrTxt, totalBytes, tamMascara, semilla, k, izquierda, numOrden);
                 if (cambio) break;
                 izquierda = !izquierda;
-                cambio = rotacionOperacion(pixelData, arrMascara, ArrTxt, totalBytes, tamMascara, semilla, k, izquierda);
+                cambio = rotacionOperacion(pixelData, arrMascara, ArrTxt, totalBytes, tamMascara, semilla, k, izquierda, numOrden);
                 if (cambio) break;
             }
             break; // Salida del case 2
@@ -344,10 +315,10 @@ void unionOperacion(unsigned char *pixelData, unsigned char *arrMascara, unsigne
         case 3:
             for (int k = 1; k < 8; k++) { // Desplazamiento
                 bool izquierda = true;
-                cambio = despOperacion(pixelData, arrMascara, ArrTxt, totalBytes, tamMascara, semilla, k, izquierda);
+                cambio = despOperacion(pixelData, arrMascara, ArrTxt, totalBytes, tamMascara, semilla, k, izquierda, numOrden);
                 if (cambio) break;
                 izquierda = !izquierda;
-                cambio = despOperacion(pixelData, arrMascara, ArrTxt, totalBytes, tamMascara, semilla, k, izquierda);
+                cambio = despOperacion(pixelData, arrMascara, ArrTxt, totalBytes, tamMascara, semilla, k, izquierda, numOrden);
                 if (cambio) break;
             }
             break; // Salida del case 3
@@ -356,34 +327,34 @@ void unionOperacion(unsigned char *pixelData, unsigned char *arrMascara, unsigne
     }
 }
 
-void procesarArchivos(int numArchivos,unsigned char *pixelData, unsigned char *arrMascara, unsigned char *arrXor, int totalBytes) {
-    for (int j = numArchivos; j >= 0 ; --j) {
-        // Construir el nombre del archivo: "M1.txt", "M2.txt", ..., "Mn.txt"
-        stringstream ss;
-        ss << "M" << j << ".txt";
-        string nombreArchivo = ss.str();
+void procesarArchivos(int numArchivos, unsigned char *pixelData, unsigned char *arrMascara, unsigned char *arrXor, int totalBytes) {
+    for (int j = numArchivos; j >= 0; --j) {
+        // Construcción del nombre del archivo usando concatenacion
+        QString nombreArchivo = "M" + QString::number(j) + ".txt";
 
         int seed = 0;
         int n_pixels = 0;
 
-        // Llamar a la función de carga
-        unsigned int* maskingData = loadSeedMasking(nombreArchivo.c_str(), seed, n_pixels);
+        // Llamar a la funcion de carga
+        unsigned int* maskingData = loadSeedMasking(nombreArchivo.toStdString().c_str(), seed, n_pixels);
 
         if (maskingData != nullptr) {
-            cout << "Archivo " << nombreArchivo << " procesado exitosamente." << endl;
-            // Aquí podrías agregar más procesamiento de datosRGB, si es necesario.
-            int tamMascara= n_pixels*3;
-            unionOperacion(pixelData,arrMascara,maskingData,arrXor,totalBytes,tamMascara,seed);
+            int tamMascara = n_pixels * 3;
+            unionOperacion(pixelData, arrMascara, maskingData, arrXor, totalBytes, tamMascara, seed, j+1);
 
-
-
-            // Liberar la memoria reservada para los datos RGB.
+            // Liberar la memoria reservada.
             delete[] maskingData;
         } else {
-            cout << "Error al cargar el archivo: " << nombreArchivo << endl;
+            cout << "Error al cargar el archivo: " << nombreArchivo.toStdString() <<endl;
+            break;
         }
 
-        cout << "----------------------------------------" << endl;
+        cout << "----------------------------------------" <<endl;
     }
 }
+
+
+
+
+
 

@@ -45,7 +45,7 @@ int main()
 {
     //Def
     // Definición de rutas de archivo de entrada (imagen original) y salida (imagen modificada)
-    QString archivoEntrada = "I_O.bmp";
+    QString archivoEntrada = "P6.bmp";
     QString archivoSalida = "I_D.bmp";
     QString archivoXOR = "I_M.bmp";
     QString archivoMascara = "M.bmp";
@@ -102,6 +102,7 @@ int main()
     cin >> numArchivos;
     // Llamamos a la función que procesa los archivos.
     procesarArchivos(numArchivos,pixelData,pixelMascara,arrXOR,tamArrOriginal);
+    bool exportI = exportImage(pixelData, width, height, archivoSalida);
     // Libera la memoria usada para los píxeles
     delete[] pixelData;
     pixelData = nullptr;
@@ -114,4 +115,3 @@ int main()
 
     return 0; // Fin del programa
 }
-

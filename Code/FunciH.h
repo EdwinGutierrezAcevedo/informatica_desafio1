@@ -22,3 +22,4 @@ void procesarArchivos(int numArchivos,unsigned char *pixelData, unsigned char *a
 
 
 
+

@@ -19,7 +19,11 @@ bool compararDato(int dato, int datoB){
 bool verficarOperacionXor(unsigned char *arrImagen,unsigned char *arrMascara,unsigned int *arrTxt,unsigned char *arrXor, int tamMascara, int semilla ){
     bool ban = true;
     for(int i = 0; i<tamMascara; i++){
+        int iM_antes=static_cast<int>(arrImagen[semilla + i]);
         unsigned char data = arrImagen[semilla + i] ^ arrXor[semilla +i];
+        int iM_despues=static_cast<int>(data);
+        int mas=arrMascara[i];
+        unsigned int iTxt=arrTxt[i];
         int temporal = static_cast<int>(data)+ static_cast<int>(arrMascara[i]);
         if(compararDato(temporal,(arrTxt[i]))== false) {
             ban = false;
@@ -48,7 +52,6 @@ bool xorOperacion(unsigned char* pixelData, unsigned char *arrMascara,unsigned i
 //Rotacion
 
 bool verificarOperacionRotacion(unsigned char *arrImagen, unsigned char *arrMascara, unsigned int *arrTxt, int tamMascara, int semilla, int numeroRot, bool izquierda) {
-    bool ban = true;
 
     for(int i = 0; i < tamMascara; i++) {
         // Aplicar rotación circular
@@ -354,7 +357,7 @@ void unionOperacion(unsigned char *pixelData, unsigned char *arrMascara, unsigne
 }
 
 void procesarArchivos(int numArchivos,unsigned char *pixelData, unsigned char *arrMascara, unsigned char *arrXor, int totalBytes) {
-    for (int j = 1; j <= numArchivos; j++) {
+    for (int j = numArchivos; j >= 0 ; --j) {
         // Construir el nombre del archivo: "M1.txt", "M2.txt", ..., "Mn.txt"
         stringstream ss;
         ss << "M" << j << ".txt";

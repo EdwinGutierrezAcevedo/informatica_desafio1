@@ -10,12 +10,15 @@ bool verficarOperacionXor(unsigned char* arrImagen,unsigned char* arrMascara,uns
 bool xorOperacion(unsigned char* pixelData, unsigned char* arrMascara,unsigned int* ArrTxt, unsigned char* otherData, int totalBytes,int tamMascara,int semilla, int numOrden);//Operacion Xor
 bool verificarOperacionRotacion(unsigned char* arrImagen, unsigned char* arrMascara, unsigned int* arrTxt, int tamMascara, int semilla, int numeroRot, bool izquierda);
 bool rotacionOperacion(unsigned char* pixelData, unsigned char* arrMascara, unsigned int* ArrTxt, int totalBytes, int tamMascara, int semilla, int numeroRot, bool izquierda, int numOrden);
-bool verficarOperacionDesplazamiento(unsigned char* arrImagen,unsigned char* arrMascara,unsigned int* arrTxt, int tamMascara, int semilla, int numeroDesp ,bool izquierda );
-bool despOperacion(unsigned char* pixelData,unsigned char* arrMascara,unsigned int* ArrTxt, int totalBytes,int tamMascara, int semilla, int numeroDesp ,bool izquierda, int numOrden);
-
+int contarCerosInicio(unsigned char num);
+int contarCerosFinal(unsigned char num);
+bool verificarDesplazamiento(unsigned char* arr, int tam);
+bool obtenerDesplazamiento(unsigned char* arr, int tam, int& numeroDesp, bool& izquierda);
+bool despOperacion(unsigned char* pixelData, unsigned char* arrMascara, int totalBytes, int tamMascara, int numOrden);
 void unionOperacion(unsigned char* pixelData, unsigned char* arrMascara, unsigned int* ArrTxt, unsigned char* arrXor, int totalBytes, int tamMascara, int semilla, int numOrden);
 void procesarArchivos(int numArchivos,unsigned char *pixelData, unsigned char *arrMascara, unsigned char *arrXor, int totalBytes);
 #endif // FUNCIONES_H
+
 
 
 

@@ -14,13 +14,16 @@ bool compararDato(int dato, int datoB){
         return ban;
     }
 }
+
+
+
 bool verficarOperacionXor(unsigned char *arrImagen,unsigned char *arrMascara,unsigned int *arrTxt,unsigned char *arrXor, int tamMascara, int semilla ){
     bool ban = true;
     for(int i = 0; i<tamMascara; i++){
-        unsigned char data = arrImagen[semilla + i] ^ arrXor[semilla +i];
+        unsigned char data = arrImagen[semilla + i] ^ arrXor[semilla +i];        //inicia desde la semilla dato por dato
         int temporal = static_cast<int>(data)+ static_cast<int>(arrMascara[i]);
         if(compararDato(temporal,(arrTxt[i]))== false) {
-            ban = false;
+            ban = false;                                                          //si un dato no coincide, se sale de la funcion
             return ban;
         }
     }
@@ -32,7 +35,7 @@ bool xorOperacion(unsigned char* pixelData, unsigned char *arrMascara, unsigned 
     bool res = verficarOperacionXor(pixelData,arrMascara,ArrTxt,otherData, tamMascara, semilla);
     if(res){
         for (int i = 0; i < totalBytes; ++i) {
-            pixelData[i] = pixelData[i] ^ otherData[i];
+            pixelData[i] = pixelData[i] ^ otherData[i];                          //se hace la operacion a toda la imagen si se comprueba que
         }
         cout<<numOrden<<")"<<" La operacion bit a bit aplicada fue xor"<<endl;
         return cambio;
@@ -88,41 +91,99 @@ bool rotacionOperacion(unsigned char *pixelData, unsigned char *arrMascara, unsi
 
 //Desplazamiento
 
-bool verficarOperacionDesplazamiento(unsigned char *arrImagen,unsigned char *arrMascara,unsigned int *arrTxt, int tamMascara, int semilla, int numeroDesp ,bool izquierda ){
-    bool ban = true;
-    for(int i = 0; i<tamMascara; i++){
-        unsigned char data = (izquierda) ? arrImagen[semilla + i]<<numeroDesp:arrImagen[semilla + i]>>numeroDesp;
-        int temporal = static_cast<int>(data)+ static_cast<int>(arrMascara[i]);
-        if(compararDato(temporal,(arrTxt[i]))== false) { //Cambiar porque en el desplazamiento se pierden datos
-            ban = false;
-            return ban;
-        }
+// Función para contar ceros al inicio en la representación binaria de 8 bits
+int contarCerosInicio(unsigned char num) {
+    int ceros = 0;
+    for (int i = 7; i >= 0; i--) { // Iterar desde el bit más significativo
+        if ((num >> i) & 1) break; // Si encontramos un '1', detenemos el conteo
+        ceros++;
     }
-    return ban;
+    return ceros;
 }
 
-bool despOperacion(unsigned char *pixelData, unsigned char *arrMascara, unsigned int *ArrTxt, int totalBytes, int tamMascara, int semilla, int numeroDesp , bool izquierda , int numOrden) {
-    string dir = (izquierda) ? "derecha":"izquierda";
-    bool cambio = true;
-    bool res = verficarOperacionDesplazamiento(pixelData,arrMascara,ArrTxt, tamMascara, semilla, numeroDesp,izquierda);
-    if(res){
-        for (int i = 0; i < totalBytes; ++i) {
-            pixelData[i] = (izquierda) ? pixelData[i] << numeroDesp:pixelData[i] >> numeroDesp;
+// Función para contar ceros al final en la representación binaria de 8 bits
+int contarCerosFinal(unsigned char num) {
+    int ceros = 0;
+    for (int i = 0; i < 8; i++) { // Iterar desde el bit menos significativo
+        if ((num >> i) & 1) break; // Si encontramos un '1', detenemos el conteo
+        ceros++;
+    }
+    return ceros;
+}
+
+// Función que verifica si todo el arreglo presenta un desplazamiento uniforme
+bool verificarDesplazamiento(unsigned char* arr, int tam) {
+    if (tam < 2) return false; // Se necesita al menos dos elementos para verificar
+
+    int cerosInicioReferencia = contarCerosInicio(arr[0]);
+    int cerosFinalReferencia = contarCerosFinal(arr[0]);
+
+    for (int i = 1; i < tam; i++) {
+        int cerosInicio = contarCerosInicio(arr[i]);
+        int cerosFinal = contarCerosFinal(arr[i]);
+
+        // Si los ceros iniciales y finales no coinciden con el primero, no hay desplazamiento uniforme
+        if (cerosInicio != cerosInicioReferencia || cerosFinal != cerosFinalReferencia) {
+            return false;
         }
-        cout<<numOrden<<")"<<" La operacion bit a bit aplicada fue un desplazamiento de "<< numeroDesp << " bits a la "<< dir <<endl;
-        return cambio;
     }
-    else{
-        cambio=false;
-        return cambio;
+
+    return true; // Se encontró un patrón de desplazamiento uniforme
+}
+
+bool obtenerDesplazamiento(unsigned char* arr, int tam, int& numeroDesp, bool& izquierda) {
+    if (tam < 2) return false;
+
+    int cerosInicioReferencia = contarCerosInicio(arr[0]);
+    int cerosFinalReferencia = contarCerosFinal(arr[0]);
+
+    for (int i = 1; i < tam; i++) {
+        int cerosInicio = contarCerosInicio(arr[i]);
+        int cerosFinal = contarCerosFinal(arr[i]);
+
+        if (cerosInicio != cerosInicioReferencia || cerosFinal != cerosFinalReferencia) {
+            return false;
+        }
     }
+
+    // Definir dirección y cantidad de bits desplazados
+    if (cerosInicioReferencia > 0) {
+        numeroDesp = cerosInicioReferencia;
+        izquierda = false; // Desplazamiento a la derecha
+    } else if (cerosFinalReferencia > 0) {
+        numeroDesp = cerosFinalReferencia;
+        izquierda = true;  // Desplazamiento a la izquierda
+    } else {
+        return false;  // No hubo desplazamiento claro
+    }
+
+    return true;
+}
+
+// Modificar `despOperacion` para recibir desplazamiento detectado
+bool despOperacion(unsigned char* pixelData, unsigned char* arrMascara, int totalBytes, int tamMascara, int numOrden) {
+    int numeroDesp;
+    bool izquierda;
+
+    // Verificar desplazamiento antes de aplicarlo
+    if (!obtenerDesplazamiento(arrMascara, tamMascara, numeroDesp, izquierda)) {
+        return false;
+    }
+
+    // Aplicar desplazamiento correcto
+    for (int i = 0; i < totalBytes; ++i) {
+        pixelData[i] = (izquierda) ? pixelData[i] << numeroDesp : pixelData[i] >> numeroDesp;
+    }
+
+    cout << numOrden << ") La operación bit a bit aplicada fue un desplazamiento de " << numeroDesp << " bits a la " << (izquierda ? "izquierda" : "derecha") << endl;
+    return true;
 }
 
 
 
 
 unsigned char* loadPixels(QString input, int &width, int &height){
-/*
+    /*
  * @brief Carga una imagen BMP desde un archivo y extrae los datos de píxeles en formato RGB.
  *
  * Esta función utiliza la clase QImage de Qt para abrir una imagen en formato BMP, convertirla al
@@ -299,29 +360,21 @@ void unionOperacion(unsigned char *pixelData, unsigned char *arrMascara, unsigne
         switch (i) {
         case 1:
             // Operacion XOR
-            cambio = xorOperacion(pixelData, arrMascara, ArrTxt, arrXor, totalBytes, tamMascara, semilla, numOrden);
-            if(cambio)break;
+            cambio = xorOperacion(pixelData, arrMascara, ArrTxt, arrXor, totalBytes, tamMascara, semilla, numOrden); //verdadero si se hizo XOR, falso de otro modo
+            if(cambio)break; // se sale si es verdadero
         case 2:
-            for (int k = 1; k < 8; k++) { // Rotacion
-                bool izquierda = true;
-                cambio = rotacionOperacion(pixelData, arrMascara, ArrTxt, totalBytes, tamMascara, semilla, k, izquierda, numOrden);
-                if (cambio) break;
-                izquierda = !izquierda;
-                cambio = rotacionOperacion(pixelData, arrMascara, ArrTxt, totalBytes, tamMascara, semilla, k, izquierda, numOrden);
-                if (cambio) break;
-            }
-            break; // Salida del case 2
-
+            int numeroDesp;
+            cambio = despOperacion(pixelData,arrMascara,totalBytes,tamMascara,numOrden);
+            if (cambio) break;
         case 3:
-            for (int k = 1; k < 8; k++) { // Desplazamiento
-                bool izquierda = true;
-                cambio = despOperacion(pixelData, arrMascara, ArrTxt, totalBytes, tamMascara, semilla, k, izquierda, numOrden);
+            for (int k = 1; k < 8; k++) { // Rotacion
+                bool izquierda = true;    // direccion
+                cambio = rotacionOperacion(pixelData, arrMascara, ArrTxt, totalBytes, tamMascara, semilla, k, izquierda, numOrden);
                 if (cambio) break;
-                izquierda = !izquierda;
-                cambio = despOperacion(pixelData, arrMascara, ArrTxt, totalBytes, tamMascara, semilla, k, izquierda, numOrden);
+                izquierda = !izquierda;  //no izquierda, osea, derecha
+                cambio = rotacionOperacion(pixelData, arrMascara, ArrTxt, totalBytes, tamMascara, semilla, k, izquierda, numOrden);
                 if (cambio) break;
             }
-            break; // Salida del case 3
         }
         break;
     }
@@ -336,11 +389,11 @@ void procesarArchivos(int numArchivos, unsigned char *pixelData, unsigned char *
         int n_pixels = 0;
 
         // Llamar a la funcion de carga
-        unsigned int* maskingData = loadSeedMasking(nombreArchivo.toStdString().c_str(), seed, n_pixels);
+        unsigned int* maskingData = loadSeedMasking(nombreArchivo.toStdString().c_str(), seed, n_pixels); //cargamos el Mj.txt
 
         if (maskingData != nullptr) {
-            int tamMascara = n_pixels * 3;
-            unionOperacion(pixelData, arrMascara, maskingData, arrXor, totalBytes, tamMascara, seed, j+1);
+            int tamMascara = n_pixels * 3;   //tamaño de la mascara
+            unionOperacion(pixelData, arrMascara, maskingData, arrXor, totalBytes, tamMascara, seed, j+1);  //rectifica y hace operaciones
 
             // Liberar la memoria reservada.
             delete[] maskingData;
@@ -352,6 +405,7 @@ void procesarArchivos(int numArchivos, unsigned char *pixelData, unsigned char *
         cout << "----------------------------------------" <<endl;
     }
 }
+
 
 
 
